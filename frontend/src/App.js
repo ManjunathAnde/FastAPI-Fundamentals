@@ -199,7 +199,7 @@ function App() {
       <header className="topbar">
         <div className="brand">
           <span className="brand-badge">📦</span>
-          <h1>Telusko Trac</h1>
+          <h1>MJ Stores</h1>
         </div>
         <div className="top-actions">
           <button className="btn btn-light" onClick={fetchProducts} disabled={loading}>
@@ -231,7 +231,6 @@ function App() {
                 placeholder="ID"
                 value={form.id}
                 onChange={handleChange}
-                required
                 disabled={!!editId}
               />
               <input

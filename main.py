@@ -39,7 +39,7 @@ def init_db():
 init_db()
 
 @app.get("/products") #using GET method to display information when the user routes to 'products' in the web app. 
-def get_products(db:Session = Depends(get_db)):
+def get_products(db:Session = Depends(get_db)):#get_products depends on session connection with db
     return db.query(database_models.Products).all()
 
 @app.get("/products/{sno}") #A dynamic URL to fetch products by ID

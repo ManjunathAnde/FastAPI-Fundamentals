@@ -9,5 +9,5 @@ class Products(dec_base):  #Schema for db instance. This is the blueprint for th
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), index=True)
     description = Column(String(500))
-    price = Column(String(20))
+    price = Column(Float(20))
     quantity = Column(Integer)

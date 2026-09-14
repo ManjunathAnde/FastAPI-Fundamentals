@@ -42,14 +42,13 @@ init_db()
 def get_products(db:Session = Depends(get_db)):#get_products depends on session connection with db
     return db.query(database_models.Products).all()
 
-@app.get("/products/{sno}") #A dynamic URL to fetch products by ID
-def get_single_product(sno:int): 
-    for product in products: #Looking up the product roster to find matching ID
-        if product.id == sno:
-            return{'message': 'Hurray! Product found',
-                   'prod_details': product
-                   } #If found, return the instance.
-    return {"error": f"Product with ID {sno} not found"} #error handling
+@app.get("/products/{id}") #A dynamic URL to fetch products by ID
+def get_single_product(id:int,db:Session = Depends(get_db)): 
+    product_with_id= db.query(database_models.Products).filter(database_models.Products.id==id).first()#filter to match product id. If multiple, return first one
+    if product_with_id:
+        return{'message': 'Hurray! Product found',
+                   'prod_details': product_with_id} #If found, return the product object.
+    return {"error": f"Product with ID {id} not found"} #error handling
 
 @app.post("/products")
 def add_product(input:Products): #accepting input in form of Products and appending to roster

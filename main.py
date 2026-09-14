@@ -42,7 +42,6 @@ init_db()
 def get_products(db:Session = Depends(get_db)):
     return db.query(database_models.Products).all()
 
-sno:int=1
 @app.get("/products/{sno}") #A dynamic URL to fetch products by ID
 def get_single_product(sno:int): 
     for product in products: #Looking up the product roster to find matching ID
@@ -57,7 +56,6 @@ def add_product(input:Products): #accepting input in form of Products and append
     products.append(input)
     return {"message":"Add successful", "item" : input}
 
-print(products)
 
 @app.put("/products")
 def update_product(id:int,product:Products):

@@ -171,6 +171,3 @@ FastAPI automatically generates interactive API documentation.
 I'm using this repository to turn backend concepts into working systems, document what I learn, and progressively raise the engineering standard of the code.
 
 Built with Python, FastAPI, and a bias toward learning by building.
-
-
-Built with Python, FastAPI, and a bias toward learning by building.

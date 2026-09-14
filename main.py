@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from models import Products
 from database import db_session,engine
 import database_models
+from sqlalchemy.orm import Session
 
 database_models.dec_base.metadata.create_all(bind=engine)
 #create a table with all metadata in dec_base class and bind it with engine (db_url constant connection)
@@ -27,13 +28,6 @@ def get_db():
         db_session_open.close()
 
 
-
-
-
-
-
-
-
 def init_db():
     db = db_session() #creating a session of linking with db
     existing = db.query(database_models.Products).first()
@@ -42,12 +36,11 @@ def init_db():
             db.add(database_models.Products(**product.model_dump()))
         db.commit()
     db.close()
+init_db()
 
 @app.get("/products") #using GET method to display information when the user routes to 'products' in the web app. 
-def get_products():
-    # db=db_session()
-    # db.query
-    return products
+def get_products(db:Session = Depends(get_db)):
+    return db.query(database_models.Products).all()
 
 sno:int=1
 @app.get("/products/{sno}") #A dynamic URL to fetch products by ID

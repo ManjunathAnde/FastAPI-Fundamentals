@@ -18,6 +18,21 @@ products = [  #Instantiating the classes
     Products(id=3, name="Pen", description="A blue ink pen", price=1.99, quantity=100),
     Products(id=4, name="Table", description="A wooden table", price=199.99, quantity=20)
 ]
+#Dependency Injection
+def get_db():
+    try: ##Establish the connection and hand the active session to the function
+        db_session_open = db_session()
+        yield db_session_open
+    finally: #Close the active session at the end of function, regardless of status of execution.
+        db_session_open.close()
+
+
+
+
+
+
+
+
 
 def init_db():
     db = db_session() #creating a session of linking with db

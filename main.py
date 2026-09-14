@@ -20,12 +20,13 @@ products = [  #Instantiating the classes
 ]
 
 def init_db():
-    db=db_session() #creating a db session
-    for product in products:
-        db.add(database_models.Products(**product.model_dump()))
-    db.commit() #committing to db
-init_db()
-
+    db = db_session() #creating a session of linking with db
+    existing = db.query(database_models.Products).first()
+    if not existing: #checks if atleast one row exists in db, adds if no informaiton exists
+        for product in products:
+            db.add(database_models.Products(**product.model_dump()))
+        db.commit()
+    db.close()
 
 @app.get("/products") #using GET method to display information when the user routes to 'products' in the web app. 
 def get_products():

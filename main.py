@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from models import Products
 from database import db_session, engine
 import database_models
@@ -8,6 +9,11 @@ database_models.dec_base.metadata.create_all(bind=engine)
 #create a table with all metadata in dec_base class and bind it with engine (db_url constant connection)
 
 app = FastAPI() #creating an instance of FASTAPI
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], #allow requests from React frontend in port 3000
+    allow_methods="*" #allow all HTTP method changes done by port 3000 frontend to the backend
+)
 
 @app.get("/") # using GET HTTP method to see information in homepage
 def greet():

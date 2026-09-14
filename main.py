@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from models import Products
-from database import db_session,engine
+from database import db_session, engine
 import database_models
 from sqlalchemy.orm import Session
 
@@ -13,12 +13,6 @@ app = FastAPI() #creating an instance of FASTAPI
 def greet():
     return "Welcome to MJ APP"
 
-products = [  #Instantiating the classes
-    Products(id=1, name="Phone", description="A smartphone", price=699.99, quantity=50),
-    Products(id=2, name="Laptop", description="A powerful laptop", price=999.99, quantity=30),
-    Products(id=3, name="Pen", description="A blue ink pen", price=1.99, quantity=100),
-    Products(id=4, name="Table", description="A wooden table", price=199.99, quantity=20)
-]
 #Dependency Injection
 def get_db():
     try: ##Establish the connection and hand the active session to the function
@@ -27,47 +21,48 @@ def get_db():
     finally: #Close the active session at the end of function, regardless of status of execution.
         db_session_open.close()
 
-
-def init_db():
-    db = db_session() #creating a session of linking with db
-    existing = db.query(database_models.Products).first()
-    if not existing: #checks if atleast one row exists in db, adds if no informaiton exists
-        for product in products:
-            db.add(database_models.Products(**product.model_dump()))
-        db.commit()
-    db.close()
-init_db()
-
-@app.get("/products") #using GET method to display information when the user routes to 'products' in the web app. 
-def get_products(db:Session = Depends(get_db)):#get_products depends on session connection with db
+@app.get("/products") #using GET method to display information when the user routes to 'products' in the web app.
+def get_products(db: Session = Depends(get_db)): #get_products depends on session connection with db
     return db.query(database_models.Products).all()
 
 @app.get("/products/{id}") #A dynamic URL to fetch products by ID
-def get_single_product(id:int,db:Session = Depends(get_db)): 
-    product_with_id= db.query(database_models.Products).filter(database_models.Products.id==id).first()#filter to match product id. If multiple, return first one
+def get_single_product(id: int, db: Session = Depends(get_db)):
+    product_with_id = db.query(database_models.Products).filter(database_models.Products.id == id).first() #filter to match product id. If multiple, return first one
     if product_with_id:
-        return{'message': 'Hurray! Product found',
-                   'prod_details': product_with_id} #If found, return the product object.
+        return {'message': 'Hurray! Product found',
+                'prod_details': product_with_id} #If found, return the product object.
     return {"error": f"Product with ID {id} not found"} #error handling
 
 @app.post("/products")
-def add_product(input:Products): #accepting input in form of Products and appending to roster
-    products.append(input)
-    return {"message":"Add successful", "item" : input}
+def add_product(input: Products, db: Session = Depends(get_db)): #accepting input in form of Products and saving to db
+    new_product = database_models.Products(
+        name=input.name,
+        description=input.description,
+        price=input.price,
+        quantity=input.quantity
+    )
+    db.add(new_product)
+    db.commit()
+    db.refresh(new_product) #refresh to get the auto-generated id from db
+    return {"message": "Add successful", "item": new_product}
 
+@app.put("/products/{id}")
+def update_product(id: int, product: Products, db: Session = Depends(get_db)):
+    existing = db.query(database_models.Products).filter(database_models.Products.id == id).first()
+    if not existing:
+        return {"error": "Product not found"}
+    existing.name = product.name
+    existing.description = product.description
+    existing.price = product.price
+    existing.quantity = product.quantity
+    db.commit()
+    return {"message": "Product update successful"}
 
-@app.put("/products")
-def update_product(id:int,product:Products):
-    for i in range(len(products)):
-        if products[i].id == id:
-            products[i] = product
-            return "Product update successful"
-    return "Product not found"
-
-@app.delete("/products")
-def delete_product (id:int,product:Products):
-    for i in range(len(products)):
-        if products[i].id == id:
-            del products[i]
-            return "Product deletion successful"
-    return "Product not found"
+@app.delete("/products/{id}")
+def delete_product(id: int, db: Session = Depends(get_db)): #only needs id, no request body required
+    existing = db.query(database_models.Products).filter(database_models.Products.id == id).first()
+    if not existing:
+        return {"error": "Product not found"}
+    db.delete(existing)
+    db.commit()
+    return {"message": "Product deletion successful"}
